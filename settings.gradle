@@ -1,0 +1,2 @@
+rootProject.name = 'cnicht'
+include 'backend'
