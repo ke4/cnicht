@@ -1,0 +1,21 @@
+######################################################################
+# Cnicht — Spring Boot application Service
+# Exposes the app on port 8080 to the local machine via LoadBalancer
+# (use `minikube tunnel` to obtain an external IP locally).
+######################################################################
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cnicht
+  labels:
+    app: cnicht
+spec:
+  type: LoadBalancer
+  selector:
+    app: cnicht
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: http

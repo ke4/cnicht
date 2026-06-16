@@ -1,20 +1,86 @@
+######################################################################
+# Cnicht — Enterprise .gitignore
+# Monorepo: Gradle (Java 25 / Spring Boot 4.1.0) + React (Vite) frontend
+######################################################################
+
+##############################
 # Gradle
+##############################
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+gradle-app.setting
+.gradletasknamecache
 
-# Node.js
+##############################
+# Java / JVM
+##############################
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+target/
+out/
+
+##############################
+# Spring Boot
+##############################
+*.original
+spring.log
+# Generated SPA assets bundled into the backend at build time
+backend/src/main/resources/static/
+
+##############################
+# Node.js / npm / Yarn / pnpm
+##############################
 node_modules/
+.npm/
+.pnpm-store/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+.yarn/cache/
+.yarn/unplugged/
 
+##############################
 # Vite / Frontend build
+##############################
 dist/
 dist-ssr/
 *.local
+.vite/
+coverage/
+.eslintcache
 
-# IDEs
+##############################
+# Environment & secrets
+##############################
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.keystore
+secrets/
+
+##############################
+# Cypress / Testing
+##############################
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+##############################
+# IDEs & Editors
+##############################
 .idea/
 *.iml
 *.iws
@@ -24,7 +90,32 @@ dist-ssr/
 .project
 .settings/
 bin/
+*.swp
+*.swo
+*~
 
-# OS
+##############################
+# OS-generated files
+##############################
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
+
+##############################
+# Docker / Kubernetes (local overrides)
+##############################
+*.local.yaml
+*.local.yml
+
+##############################
+# Logs & temp
+##############################
+logs/
+*.tmp
+*.bak
+*.pid

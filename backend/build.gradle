@@ -1,7 +1,11 @@
+import com.github.gradle.node.npm.task.NpmTask
+
 plugins {
     id 'java'
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
+    // gradle-node-plugin: drives the React/Vite build from Gradle.
+    id 'com.github.node-gradle.node' version '7.1.0'
 }
 
 dependencies {
@@ -11,6 +15,34 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+node {
+    // Pin and auto-provision the Node.js toolchain so builds are reproducible.
+    version = '20.19.0'
+    download = true
+    // The React frontend lives as a sibling project to the backend.
+    nodeProjectDir = file("${projectDir}/../frontend")
+}
+
+// Compile the React assets into the backend's static resources so that
+// Spring Boot serves the bundled SPA directly from the executable jar.
+tasks.register('buildFrontend', NpmTask) {
+    dependsOn 'npmInstall'
+    args = ['run', 'build']
+    // Surface the target directory to the frontend build (Vite reads this).
+    environment = [
+            'BUILD_OUTPUT_DIR': "${projectDir}/src/main/resources/static".toString()
+    ]
+    inputs.dir("${projectDir}/../frontend/src")
+    inputs.file("${projectDir}/../frontend/package.json")
+    outputs.dir("${projectDir}/src/main/resources/static")
+}
+
+// Ensure the frontend assets are bundled before the backend resources are
+// processed, so the compiled SPA ends up inside the jar.
+tasks.named('processResources') {
+    dependsOn 'buildFrontend'
 }
 
 tasks.named('test') {

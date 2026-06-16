@@ -1,0 +1,63 @@
+######################################################################
+# Cnicht — Spring Boot application Deployment
+# Runs 2 replicas of the locally-built image, wired to PostgreSQL via
+# credentials injected from the Postgres Secret.
+######################################################################
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cnicht
+  labels:
+    app: cnicht
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cnicht
+  template:
+    metadata:
+      labels:
+        app: cnicht
+    spec:
+      containers:
+        - name: cnicht
+          image: cnicht:0.0.1-SNAPSHOT
+          # Use the image already present in the local cluster registry
+          # (e.g. loaded via `minikube image load` / `kind load`).
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://cnicht-postgres:5432/cnicht
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cnicht-postgres-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cnicht-postgres-secret
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"

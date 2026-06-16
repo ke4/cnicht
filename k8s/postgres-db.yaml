@@ -1,0 +1,101 @@
+######################################################################
+# Cnicht — Local PostgreSQL persistence layer
+# Secret + Headless Service + StatefulSet (with VolumeClaimTemplate)
+######################################################################
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cnicht-postgres-secret
+  labels:
+    app: cnicht-postgres
+type: Opaque
+stringData:
+  POSTGRES_DB: cnicht
+  POSTGRES_USER: cnicht
+  POSTGRES_PASSWORD: cnicht-local-pwd
+---
+# Headless service (clusterIP: None) gives each StatefulSet pod a stable
+# network identity, e.g. cnicht-postgres-0.cnicht-postgres.default.svc.
+apiVersion: v1
+kind: Service
+metadata:
+  name: cnicht-postgres
+  labels:
+    app: cnicht-postgres
+spec:
+  clusterIP: None
+  selector:
+    app: cnicht-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cnicht-postgres
+  labels:
+    app: cnicht-postgres
+spec:
+  serviceName: cnicht-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cnicht-postgres
+  template:
+    metadata:
+      labels:
+        app: cnicht-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: cnicht-postgres-secret
+          env:
+            # Keep PGDATA in a subdirectory of the mount so initdb does not
+            # fail on the "lost+found" entry some volumes create at the root.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
