@@ -292,15 +292,15 @@ Requirements:
 5. Create 'k8s/postgres-db.yaml' to configure a persistent local PostgreSQL instance using a Kubernetes StatefulSet (image: postgres:17-alpine) with a Headless Service, a Secret for database credentials, and a VolumeClaimTemplate requesting a 2Gi volume.  
 6. Create 'k8s/Cnicht-deployment.yaml' and 'k8s/Cnicht-service.yaml' to run the Spring Boot app with 2 replicas, pulling the image locally, injecting database credentials from the Postgres Secret, and exposing port 8080 via a LoadBalancer service.
 
-### **PROMPT 2: GITHUB ACTIONS PIPELINE & E2E TESTING (Role: Lead Architect / QA Engineer)**
+### **PROMPT 2: GITHUB ACTIONS PIPELINE (Role: Lead Architect)**
 
-Context: You are a DevOps and QA Specialist focusing on CI/CD pipelines and Cypress E2E flows.  
-Task: Configure a GitHub Actions workflow and write a comprehensive E2E integration test for 'Cnicht'.
+Context: You are a DevOps and QA Specialist focusing on CI/CD pipelines.  
+Task: Configure a GitHub Actions workflow.
 
 Requirements:  
 1. Create a GitHub Actions workflow '.github/workflows/ci-cd.yml'. It must set up JDK 25 and Node.js 20, run headless Cypress component tests inside the 'frontend/' folder, compile and run JUnit tests inside the 'backend/' folder, and compile the combined bootJar.  
 2. Include a Docker build step in the workflow to package the application, using 'eclipse-temurin:25-jre-alpine' as the runtime base image. Include a mock Kubernetes apply block for deployment on main branch pushes.  
-3. Create a complete Cypress E2E spec 'cypress/e2e/job_tracking_flow.cy.js' to verify the entire system flow (Login, Logout) against the running application.
+
 
 ### **PROMPT 3: FLYWAY SCHEMA INIT WITH INTERVIEWS (Role: Database Architect)**
 
@@ -355,7 +355,8 @@ Requirements:
 2. The tests must assert:  
 - Clicking submit while fields are empty prevents execution and displays an error message reading "Email and password are required".  
 - Inputting 'user@Cnicht.com' and a password, then clicking submit, correctly triggers the 'onLogin' prop callback with the corresponding values.  
-3. Write the React component 'LoginForm.jsx' in Tailwind CSS with 'data-cy' target attributes matching your Cypress selectors. Implement the state and submit handlers required to pass your component tests.
+3. Write the React component 'LoginForm.jsx' in Tailwind CSS with 'data-cy' target attributes matching your Cypress selectors. Implement the state and submit handlers required to pass your component tests. 
+4. Create a complete Cypress E2E spec 'cypress/e2e/job_tracking_flow.cy.js' to verify the entire system flow (Login, Logout) against the running application.
 
 ### **PROMPT 6: TASKS 3, 4, 5 - JOB APPLICATIONS & NESTED INTERVIEWS REST API TDD (Role: TDD Backend Developer)**
 
