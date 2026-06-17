@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: cnicht_db
+    environment:
+      POSTGRES_USER: cnicht_user
+      POSTGRES_PASSWORD: cnicht_password
+      POSTGRES_DB: cnicht
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/test:/var/lib/postgresql/data
