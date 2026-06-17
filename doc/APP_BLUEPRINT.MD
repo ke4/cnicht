@@ -123,6 +123,16 @@ Every coding phase must follow strict **Red-Green-Refactor** loops.
     3. Execute Gradle JUnit backend test suite.
     4. Package final deployment JAR and trigger Docker compilation.
 
+#### **Use Case 1.3: Local Docker PostgreSQL Setup**
+
+* **Actor:** Developer
+* **Preconditions:** Docker and Docker Compose installed.
+* **Postconditions:** PostgreSQL database runs as a container with persistent storage under `data/test`.
+* **Basic Flow:**
+    1. Create `docker-compose.yml` defining the PostgreSQL service.
+    2. Map a local volume `./data/test` to the container's PostgreSQL data directory.
+    3. Run `docker compose up -d` to start the database.
+
 #### **TDD Testing & Verification Criteria**
 
 NONE for now. It is going to be implemented in the next task.
@@ -282,15 +292,22 @@ These targeted, role-based prompts are designed to be copied and pasted directly
 ### **PROMPT 1: MONOREPO FOUNDATION & KUBERNETES SETUP (Role: Lead Architect)**
 
 Context: You are a Lead Software Architect specializing in Spring Boot and React monorepos.  
-Task: Configure the root directory of a project named 'Cnicht' using Java 25 (LTS) and Gradle (Groovy DSL) with a multi-project structure. Create the Kubernetes manifests to deploy this application locally.
+Task: Configure the root directory of a project named 'Cnicht' using Java 25 (LTS) and Gradle (Groovy DSL) with a multi-project structure. Create the Kubernetes manifests and local Docker Compose for this application.
 
 Requirements:  
 1. Create a root 'settings.gradle' file using Groovy DSL that defines the root project name as 'Cnicht' and includes the 'backend' subproject.  
 2. Create a root 'build.gradle' file using Groovy DSL that defines the group 'com.Cnicht' and version '1.0.0-SNAPSHOT'. Declare that we will use Spring Boot 4.1.0 and Java 25.  
-3. Configure the gradle-node-plugin (com.github.node-gradle.node) version 7.1.0 inside 'backend/build.gradle' using Groovy DSL, targeting Node.js version 20.11.0, with download = true and '../frontend' as the nodeProjectDir. Set NpmTask 'buildFrontend' to run 'npm run build' inside the frontend project so that React assets are compiled into 'backend/src/main/resources/static'.  
+3. Configure 'backend/build.gradle' with:
+    - Spring Boot starters: 'web', 'data-jpa', 'test'.
+    - Flyway: 'flyway-core', 'flyway-database-postgresql'.
+    - Runtime: 'postgresql'.
+    - Testcontainers: 'org.springframework.boot:spring-boot-testcontainers', 'org.testcontainers:postgresql' for consistent dependency management.
+    - Node plugin (com.github.node-gradle.node) version 7.1.0, targeting Node.js 20.11.0, with download = true and '../frontend' as the nodeProjectDir.
+    - NpmTask 'buildFrontend' to run 'npm run build' inside the frontend project so that React assets are compiled into 'backend/src/main/resources/static'.  
 4. Provide a complete enterprise-grade '.gitignore' file.  
-5. Create 'k8s/postgres-db.yaml' to configure a persistent local PostgreSQL instance using a Kubernetes StatefulSet (image: postgres:17-alpine) with a Headless Service, a Secret for database credentials, and a VolumeClaimTemplate requesting a 2Gi volume.  
-6. Create 'k8s/Cnicht-deployment.yaml' and 'k8s/Cnicht-service.yaml' to run the Spring Boot app with 2 replicas, pulling the image locally, injecting database credentials from the Postgres Secret, and exposing port 8080 via a LoadBalancer service.
+5. Create 'docker-compose.yml' in the root to run a local PostgreSQL instance (image: postgres:17-alpine) with a persistent volume mapped to './data/test'.
+6. Create 'k8s/postgres-db.yaml' to configure a persistent local PostgreSQL instance using a Kubernetes StatefulSet (image: postgres:17-alpine) with a Headless Service, a Secret for database credentials, and a VolumeClaimTemplate requesting a 2Gi volume.  
+7. Create 'k8s/Cnicht-deployment.yaml' and 'k8s/Cnicht-service.yaml' to run the Spring Boot app with 2 replicas, pulling the image locally, injecting database credentials from the Postgres Secret, and exposing port 8080 via a LoadBalancer service.
 
 ### **PROMPT 2: GITHUB ACTIONS PIPELINE (Role: Lead Architect)**
 
@@ -305,31 +322,37 @@ Requirements:
 ### **PROMPT 3: FLYWAY SCHEMA INIT WITH INTERVIEWS (Role: Database Architect)**
 
 Context: You are a Database Architect specializing in PostgreSQL and Flyway schema design.  
-Task: Create the relational database migrations for the 'Cnicht' application to replace a flat tracking spreadsheet and support multiple interview rounds.
+Task: Create the relational database migrations and backend configuration for the 'Cnicht' application.
 
 Requirements:  
 1. Write a Flyway migration file named 'V1__Init_Schema.sql' inside 'backend/src/main/resources/db/migration/'.  
-2. Create a 'users' table with columns: 'id' (BIGSERIAL PRIMARY KEY), 'email' (VARCHAR(255) UNIQUE NOT NULL), 'password_hash' (VARCHAR(255) NOT NULL), and 'created_at' (TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP).  
+2. Create a 'users' table with columns: 
+- 'id' (BIGSERIAL PRIMARY KEY),
+- 'email' (VARCHAR(255) UNIQUE NOT NULL),
+- 'password_hash' (VARCHAR(255) NOT NULL),
+- 'created_at' (TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP).  
 3. Create a 'job_applications' table with columns:  
 - 'id' (BIGSERIAL PRIMARY KEY)  
-- 'application_id' (VARCHAR(50) UNIQUE NOT NULL) -- Business generated unique identifier  
+- 'application_id' (VARCHAR(50)) –- Business sometimes provides this identifier  
 - 'user_id' (BIGINT NOT NULL, FK to users(id) ON DELETE CASCADE)  
 - 'company' (VARCHAR(255) NOT NULL)  
 - 'job_title' (VARCHAR(255) NOT NULL)  
 - 'interview_stage' (VARCHAR(100) NOT NULL)  
 - 'application_date' (DATE NOT NULL)  
 - 'hr_agent', 'recruiter', 'url' (VARCHAR), 'company_profile' (TEXT)  
-- 'created_at' and 'updated_at' (TIMESTAMPS NOT NULL DEFAULT CURRENT_TIMESTAMP)  
+- 'created_at'
+- 'updated_at' (TIMESTAMPS NOT NULL DEFAULT CURRENT_TIMESTAMP)  
 4. Create an 'interviews' table with columns:  
 - 'id' (BIGSERIAL PRIMARY KEY)  
 - 'job_application_id' (BIGINT NOT NULL, FK to job_applications(id) ON DELETE CASCADE)  
-- 'interview_stage' (VARCHAR(100) NOT NULL) -- specific round name (e.g. "HR Screen", "Technical")  
+- 'interview_stage' (VARCHAR(100) NOT NULL) –- specific round name (e.g. "HR Screen", "Technical")  
 - 'interview_date' (TIMESTAMP NOT NULL)  
 - 'details' (TEXT) -- free-text field  
 - 'interviewer' (VARCHAR(255))  
 - 'url' (VARCHAR(1024))  
 - 'is_it_last_stage' (BOOLEAN NOT NULL DEFAULT FALSE)  
 5. Create indices on foreign keys and unique indexes on 'job_applications(application_id)'.
+6. Configure 'backend/src/main/resources/application.properties' to enable Flyway, set migration locations, and configure the datasource connection to the local PostgreSQL instance.
 
 ### **PROMPT 4: TASK 2 - SAME-ORIGIN SECURITY & AUTHENTICATION TDD (Role: TDD Backend Developer)**
 
