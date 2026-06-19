@@ -1,4 +1,4 @@
-import App from './App'
+import App from '../../../src/App'
 
 describe('App.cy.tsx', () => {
   it('renders', () => {

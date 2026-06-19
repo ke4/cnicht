@@ -60,15 +60,44 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  position: relative;
 }
 
 body {
   margin: 0;
+  background-color: green;
+}
+div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 12px;
+}
+
+div.loginForm {
+  /*text-align: left;*/
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+label.block.text-sm.font-medium.text-gray-700 {
+  /*display: inline-block;*/
+  text-align: left;
+  width: 100px;
+  flex-shrink: 0;
+  /*margin-bottom: 0px;*/
+}
+
+input.mt-1.block.w-full.border.border-gray-300.rounded-md.shadow-sm.p-2 {
+  display: block;
+  width: 100%;
 }
 
 h1,
 h2 {
-  font-family: var(--heading);
+  font-family: var(--heading), serif;
   font-weight: 500;
   color: var(--text-h);
 }
@@ -76,7 +105,10 @@ h2 {
 h1 {
   font-size: 56px;
   letter-spacing: -1.68px;
-  margin: 32px 0;
+  margin: 0;
+  position: absolute;
+  top: 2rem;
+  white-space: nowrap;
   @media (max-width: 1024px) {
     font-size: 36px;
     margin: 20px 0;
@@ -97,7 +129,7 @@ p {
 
 code,
 .counter {
-  font-family: var(--mono);
+  font-family: var(--mono), serif;
   display: inline-flex;
   border-radius: 4px;
   color: var(--text-h);
@@ -109,3 +141,36 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.min-h-screen.bg-gray-100.flex.flex-col.items-center.justify-center.p-4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  height: 100vh;
+  padding: 2rem;
+  position: relative;
+}
+
+/*.max-w-md.w-full {*/
+/*  margin-top: 0;*/
+/*  margin-bottom: 0;*/
+/*}*/
+
+.max-w-md.w-full { /* the element was .max-w-md.w-full */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+p.register {
+  margin-top: 5rem;
+}
+
+/*p { !* the element was p.mt-4.text-center *!*/
+/*  margin-top: 3rem;*/
+/*  display: block;*/
+/*  text-align: center;*/
+/*  width: 100%;*/
+/*}*/
