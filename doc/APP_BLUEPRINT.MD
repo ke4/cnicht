@@ -658,7 +658,7 @@ Requirements:
 - Submitting empty inputs prompts an error reading "Email and password are required".  
 - Submitting valid login criteria executes 'onLogin' with the target credentials.  
 3. Write a Cypress component test verifying that clicking the "Log Out" button on the dashboard component triggers a POST request to '/api/auth/logout', clears client authentication state context, and redirects the user to the login screen.  
-4. Write the React components 'LoginForm.jsx' and 'RegisterForm.jsx' in Tailwind CSS using 'data-cy' attributes for your Cypress test selectors. Create the states, handlers, and Axios configurations required to pass all component tests.
+4. Write the React components 'LoginForm.tsx' and 'RegisterForm.tsx' in Tailwind CSS using 'data-cy' attributes for your Cypress test selectors. Create the states, handlers, and Axios configurations required to pass all component tests.
 5. Create a complete Cypress E2E spec 'cypress/e2e/job_tracking_flow.cy.js' to verify the entire system flow (Login, Logout) against the running application.
 
 ### **PROMPT 6: TASKS 3, 4, 5 - MODULAR REPOS, APPLICATIONS & NESTED INTERVIEWS REST API TDD (Role: TDD Backend Developer)**
